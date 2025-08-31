@@ -26,7 +26,7 @@ Ce projet permet de déployer le modèle `meta-llama/Llama-3.2-1B-Instruct` sur 
 │                  OpenShift AI                              │
 ├─────────────────────────────────────────────────────────────┤
 │  DataConnection: llama-model-pvc-connection                │
-│  ServingRuntime: llama-32-1b-instruct (vLLM)             │
+│  ServingRuntime: llama-32-1b-instruct (Serving Model)     │
 │  InferenceService: llama-32-1b-instruct                   │
 │  └── Pod avec GPU                                         │
 └─────────────────────────────────────────────────────────────┘
@@ -170,7 +170,7 @@ chmod +x deploy.sh
 4. ✅ Création du secret de connexion PVC
 5. ✅ Téléchargement du modèle depuis Hugging Face
 6. ✅ Vérification du contenu du PVC
-7. ✅ Création du ServingRuntime vLLM
+7. ✅ Création du ServingRuntime (Serving Model)
 8. ✅ Création de l'InferenceService
 
 ### 5. Vérification du déploiement
@@ -366,8 +366,8 @@ oc get events -n llama-instruct-32-1b-demo
 
 ## 📚 Ressources
 
-- [Documentation OpenShift AI](https://docs.openshift.com/ai/)
-- [Documentation vLLM](https://docs.vllm.ai/)
+- [Documentation Red Hat OpenShift AI Self-Managed](https://docs.redhat.com/es/documentation/red_hat_openshift_ai_self-managed/2.22)
+- [Serving Models - Red Hat OpenShift AI](https://docs.redhat.com/es/documentation/red_hat_openshift_ai_self-managed/2.22/html-single/serving_models/index)
 - [Documentation Hugging Face](https://huggingface.co/docs)
 - [Modèle Llama-3.2-1B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct)
 
