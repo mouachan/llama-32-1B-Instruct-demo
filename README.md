@@ -14,18 +14,21 @@ Ce projet permet de déployer le modèle `meta-llama/Llama-3.2-1B-Instruct` sur 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    OpenShift AI                            │
+│                    OpenShift                               │
 ├─────────────────────────────────────────────────────────────┤
-│  InferenceService (llama-32-1b-instruct)                  │
-│  ├── ServingRuntime (vLLM)                                │
-│  └── Pod avec GPU                                         │
-├─────────────────────────────────────────────────────────────┤
-│  PVC (pvc-llama32-1b-instruct)                           │
+│  Secret: huggingface-token                                │
+│  PVC: pvc-llama32-1b-instruct                            │
 │  └── Modèle téléchargé depuis Hugging Face                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  OpenShift AI                              │
 ├─────────────────────────────────────────────────────────────┤
-│  Secrets                                                   │
-│  ├── huggingface-token                                    │
-│  └── llama-model-pvc-connection (DataConnection)          │
+│  DataConnection: llama-model-pvc-connection                │
+│  ServingRuntime: llama-32-1b-instruct (vLLM)             │
+│  InferenceService: llama-32-1b-instruct                   │
+│  └── Pod avec GPU                                         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
