@@ -1,0 +1,48 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: llama-32-1b-instruct
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    opendatahub.io/accelerator-name: nvidia-a10g-gpu
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/hardware-profile-name: nvidia-a10g-gpu-5dc38-serving
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    opendatahub.io/runtime-version: v0.9.1.0
+    opendatahub.io/serving-runtime-scope: global
+    opendatahub.io/template-display-name: vLLM NVIDIA GPU ServingRuntime for KServe - Llama
+    opendatahub.io/template-name: vllm-cuda-runtime-llama
+    openshift.io/display-name: llama-32-1b-instruct
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "8080"
+  containers:
+  - args:
+    - --port=${API_PORT}
+    command:
+    - python
+    - -m
+    - vllm.entrypoints.openai.api_server
+    env:
+    - name: HF_HOME
+      value: /tmp/hf_home
+    image: quay.io/modh/vllm@sha256:56aa86c6ed6ba6cc9557a8583ff9d4ee535193f6cda030bd1268064bc70120e3
+    name: kserve-container
+    ports:
+    - containerPort: ${API_PORT}
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /dev/shm
+      name: shm
+  multiModel: false
+  supportedModelFormats:
+  - autoSelect: true
+    name: vLLM
+  volumes:
+  - emptyDir:
+      medium: Memory
+      sizeLimit: 2Gi
+    name: shm

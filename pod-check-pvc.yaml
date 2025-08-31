@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: check-pvc-content
+  namespace: llama-instruct-32-1b-demo
+spec:
+  containers:
+  - name: check-content
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    command:
+    - /bin/bash
+    - -c
+    - |
+      echo "📁 Contenu du PVC:"
+      ls -la /models/llama32-1b-instruct/
+      echo ""
+      echo "📊 Taille des fichiers:"
+      du -sh /models/llama32-1b-instruct/*
+      echo ""
+      echo "🔍 Détails des fichiers:"
+      find /models/llama32-1b-instruct -type f -exec ls -lh {} \;
+      echo ""
+      echo "💾 Espace utilisé total:"
+      du -sh /models/llama32-1b-instruct
+    volumeMounts:
+    - name: model-storage
+      mountPath: /models
+  volumes:
+  - name: model-storage
+    persistentVolumeClaim:
+      claimName: pvc-llama32-1b-instruct
+  restartPolicy: Never

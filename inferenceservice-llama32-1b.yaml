@@ -1,0 +1,51 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: llama-32-1b-instruct
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    openshift.io/display-name: ${HUGGINGFACE_MODEL}
+    serving.kserve.io/deploymentMode: RawDeployment
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      args:
+      - --model
+      - /mnt/models/llama32-1b-instruct
+      - --tensor-parallel-size
+      - "${MODEL_TENSOR_PARALLEL_SIZE}"
+      - --gpu-memory-utilization
+      - "${GPU_MEMORY_UTILIZATION}"
+      - --max-model-len
+      - "${MODEL_MAX_LENGTH}"
+      - --dtype
+      - auto
+      - --trust-remote-code
+      - --enforce-eager
+      - --served-model-name
+      - llama-32-1b-instruct
+      modelFormat:
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "${CPU_LIMIT}"
+          memory: ${MEMORY_LIMIT}
+          nvidia.com/gpu: "${GPU_COUNT}"
+        requests:
+          cpu: "${CPU_REQUEST}"
+          memory: ${MEMORY_REQUEST}
+          nvidia.com/gpu: "${GPU_COUNT}"
+      runtime: llama-32-1b-instruct
+      storageUri: pvc://pvc-llama32-1b-instruct
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Equal
+      value: ${GPU_TYPE}

@@ -1,0 +1,34 @@
+# Configuration pour le déploiement du modèle Llama-3.2-1B-Instruct sur OpenShift AI
+# ⚠️  COPIEZ CE FICHIER VERS .env ET REMPLISSEZ AVEC VOS VALEURS !
+
+# Configuration OpenShift
+OPENSHIFT_CLUSTER_URL="VOTRE_URL_API_OPENSHIFT_ICI"
+OPENSHIFT_PROJECT="llama-instruct-32-1b-demo"
+OPENSHIFT_CLUSTER_DOMAIN="VOTRE_DOMAINE_CLUSTER_ICI"
+
+# Configuration Hugging Face
+HUGGINGFACE_TOKEN="VOTRE_TOKEN_HF_ICI"
+HUGGINGFACE_MODEL="meta-llama/Llama-3.2-1B-Instruct"
+
+# Configuration GPU
+GPU_TYPE="NVIDIA-A10G-PRIVATE"
+GPU_COUNT="1"
+GPU_MEMORY_UTILIZATION="0.85"
+
+# Configuration du modèle
+MODEL_MAX_LENGTH="4096"
+MODEL_TENSOR_PARALLEL_SIZE="1"
+
+# Configuration des ressources
+CPU_REQUEST="2"
+CPU_LIMIT="4"
+MEMORY_REQUEST="6Gi"
+MEMORY_LIMIT="8Gi"
+
+# Configuration du stockage
+PVC_SIZE="10Gi"
+STORAGE_CLASS="gp3-csi"
+
+# Configuration de l'API
+API_PORT="8080"
+API_TIMEOUT="60"

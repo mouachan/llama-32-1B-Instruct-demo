@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: download-llama32-1b-instruct-hf-cli
+  namespace: llama-instruct-32-1b-demo
+spec:
+  template:
+    spec:
+      containers:
+      - name: download-model
+        image: registry.access.redhat.com/ubi8/python-39:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Install huggingface_hub
+          pip3 install huggingface_hub
+          
+          # Set token from secret
+          export HF_TOKEN=$(cat /secrets/hf-token)
+          
+          # Run the Python download script
+          echo "🔑 Token lu: ${HF_TOKEN:0:10}..."
+          echo "📥 Début du téléchargement du modèle..."
+          
+          # Copy the script to the container
+          cat > /tmp/download_model.py << EOF
+          from huggingface_hub import snapshot_download
+          
+          # Specify the Hugging Face repository containing the model
+          model_repo = "${HUGGINGFACE_MODEL}"
+          
+          # Download the model with token authentication
+          snapshot_download(
+              repo_id=model_repo,
+              local_dir="/models/llama32-1b-instruct",
+              allow_patterns=["*.safetensors", "*.json", "*.txt", "*.model"],
+              token="$HF_TOKEN"
+          )
+          EOF
+          
+          # Execute the script
+          python3 /tmp/download_model.py
+          
+          echo "✅ Téléchargement terminé!"
+          
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        - name: hf-secret
+          mountPath: /secrets
+          readOnly: true
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: pvc-llama32-1b-instruct
+      - name: hf-secret
+        secret:
+          secretName: huggingface-token
+          items:
+          - key: token
+            path: hf-token
+      restartPolicy: Never
+  backoffLimit: 3

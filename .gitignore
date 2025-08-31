@@ -1,0 +1,89 @@
+# Fichiers de configuration sensibles
+.env
+.env.local
+.env.production
+.env.staging
+
+# Fichiers de secrets et tokens
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Fichiers de logs
+*.log
+logs/
+log/
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Fichiers de cache
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Fichiers de données et modèles
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.h5
+
+# Fichiers de test et téléchargements
+test-download/
+downloads/
+temp/
+
+# Fichiers d'IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers système
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Fichiers OpenShift temporaires
+*.yaml.bak
+*.yaml.old
+*.yaml.tmp
+
+# Fichiers de backup
+*.bak
+*.backup
+*.old
