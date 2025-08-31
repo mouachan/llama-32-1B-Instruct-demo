@@ -25,7 +25,7 @@ Ce projet permet de déployer le modèle `meta-llama/Llama-3.2-1B-Instruct` sur 
 ├─────────────────────────────────────────────────────────────┤
 │  Secrets                                                   │
 │  ├── huggingface-token                                    │
-│  └── llama-model-pvc-connection                           │
+│  └── llama-model-pvc-connection (DataConnection)          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
