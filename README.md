@@ -312,6 +312,26 @@ Pour redéployer après un nettoyage :
 
 Le modèle expose les endpoints suivants :
 
+### Test de la fonctionnalité RAG (optionnel)
+
+Si vous souhaitez utiliser la fonctionnalité RAG avec Docling :
+
+```bash
+# Aller dans le répertoire RAG
+cd llamastack/rag
+
+# Déployer la fonctionnalité RAG
+./deploy-rag.sh
+
+# Ou déployer manuellement
+oc apply -f docling-pipeline.yaml
+
+# Tester la fonctionnalité RAG
+python3 test-rag.py
+```
+
+Pour plus de détails, consultez le [README RAG](llamastack/rag/README.md).
+
 - **`/v1/models`** : Liste des modèles disponibles
 - **`/v1/chat/completions`** : Chat conversationnel
 - **`/v1/completions`** : Génération de texte
@@ -392,7 +412,12 @@ llama-3.2-1B-Instruct-demo/
 ├── test-llama-curl.sh             # Tests curl
 └── llamastack/                    # Configuration LlamaStack
     ├── llama-stack-inference-model-secret.yaml  # Secret pour LlamaStack
-    └── llama-stack-distribution.yaml            # Distribution LlamaStack
+    ├── llama-stack-distribution.yaml            # Distribution LlamaStack
+    └── rag/                       # Configuration RAG avec Docling
+        ├── README.md              # Documentation RAG
+        ├── docling-pipeline.yaml  # Pipeline Tekton pour l'ingestion
+        ├── deploy-rag.sh         # Script de déploiement RAG
+        └── test-rag.py           # Script de test RAG
 ```
 
 ## 🤝 Contribution

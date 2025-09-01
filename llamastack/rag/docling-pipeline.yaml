@@ -1,0 +1,179 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: docling-pipeline
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    openshift.io/description: "Pipeline Docling pour l'ingestion de documents dans Milvus"
+    openshift.io/display-name: "Docling Pipeline - Ingestion RAG"
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  description: "Pipeline pour ingérer des documents PDF dans la base vectorielle Milvus"
+  params:
+    - name: base_url
+      description: "URL de base pour récupérer les fichiers PDF"
+      type: string
+      default: "https://example.com/pdfs"
+    - name: pdf_filenames
+      description: "Liste des noms de fichiers PDF séparés par des virgules"
+      type: string
+      default: "document1.pdf,document2.pdf"
+    - name: num_workers
+      description: "Nombre de workers parallèles"
+      type: string
+      default: "2"
+    - name: vector_db_id
+      description: "ID de la base de données vectorielle Milvus"
+      type: string
+      default: "my_milvus_db"
+    - name: service_url
+      description: "URL du service Milvus"
+      type: string
+      default: "http://milvus-standalone:19530"
+    - name: embed_model_id
+      description: "ID du modèle d'embedding"
+      type: string
+      default: "granite-embedding-125m"
+    - name: max_tokens
+      description: "Nombre maximum de tokens par chunk"
+      type: string
+      default: "512"
+    - name: use_gpu
+      description: "Activer l'accélération GPU"
+      type: string
+      default: "false"
+  workspaces:
+    - name: shared-workspace
+      description: "Workspace partagé pour les documents"
+  tasks:
+    - name: download-documents
+      taskRef:
+        name: download-pdfs
+      params:
+        - name: base_url
+          value: $(params.base_url)
+        - name: pdf_filenames
+          value: $(params.pdf_filenames)
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: process-documents
+      taskRef:
+        name: docling-process
+      runAfter: ["download-documents"]
+      params:
+        - name: num_workers
+          value: $(params.num_workers)
+        - name: vector_db_id
+          value: $(params.vector_db_id)
+        - name: service_url
+          value: $(params.service_url)
+        - name: embed_model_id
+          value: $(params.embed_model_id)
+        - name: max_tokens
+          value: $(params.max_tokens)
+        - name: use_gpu
+          value: $(params.use_gpu)
+      workspaces:
+        - name: input
+          workspace: shared-workspace
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: download-pdfs
+  namespace: llama-instruct-32-1b-demo
+spec:
+  description: "Télécharger les documents PDF depuis une URL"
+  params:
+    - name: base_url
+      description: "URL de base pour les PDFs"
+      type: string
+    - name: pdf_filenames
+      description: "Noms des fichiers PDF"
+      type: string
+  workspaces:
+    - name: output
+      description: "Répertoire de sortie pour les PDFs"
+  steps:
+    - name: download
+      image: registry.access.redhat.com/ubi8/ubi:latest
+      script: |
+        #!/bin/bash
+        set -e
+        
+        # Installer curl
+        dnf install -y curl
+        
+        # Créer le répertoire de sortie
+        mkdir -p $(workspaces.output.path)/pdfs
+        
+        # Télécharger chaque fichier PDF
+        IFS=',' read -ra FILES <<< "$(params.pdf_filenames)"
+        for file in "${FILES[@]}"; do
+          echo "Téléchargement de $file..."
+          curl -L -o "$(workspaces.output.path)/pdfs/$file" "$(params.base_url)/$file"
+        done
+        
+        echo "Téléchargement terminé"
+        ls -la $(workspaces.output.path)/pdfs/
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: docling-process
+  namespace: llama-instruct-32-1b-demo
+spec:
+  description: "Traiter les documents avec Docling et les ingérer dans Milvus"
+  params:
+    - name: num_workers
+      description: "Nombre de workers"
+      type: string
+    - name: vector_db_id
+      description: "ID de la base vectorielle"
+      type: string
+    - name: service_url
+      description: "URL du service Milvus"
+      type: string
+    - name: embed_model_id
+      description: "ID du modèle d'embedding"
+      type: string
+    - name: max_tokens
+      description: "Nombre maximum de tokens"
+      type: string
+    - name: use_gpu
+      description: "Utiliser GPU"
+      type: string
+  workspaces:
+    - name: input
+      description: "Répertoire d'entrée avec les PDFs"
+  steps:
+    - name: process
+      image: quay.io/opendatahub/docling:latest
+      script: |
+        #!/bin/bash
+        set -e
+        
+        echo "Début du traitement Docling..."
+        
+        # Configuration Docling
+        export MILVUS_URL="$(params.service_url)"
+        export VECTOR_DB_ID="$(params.vector_db_id)"
+        export EMBED_MODEL_ID="$(params.embed_model_id)"
+        export MAX_TOKENS="$(params.max_tokens)"
+        export USE_GPU="$(params.use_gpu)"
+        export NUM_WORKERS="$(params.num_workers)"
+        
+        # Traiter les documents PDF
+        docling process \
+          --input-dir $(workspaces.input.path)/pdfs \
+          --output-dir $(workspaces.input.path)/processed \
+          --vector-db-id $VECTOR_DB_ID \
+          --embed-model-id $EMBED_MODEL_ID \
+          --max-tokens $MAX_TOKENS \
+          --use-gpu $USE_GPU \
+          --num-workers $NUM_WORKERS
+        
+        echo "Traitement Docling terminé"
+        echo "Documents ingérés dans la base vectorielle: $VECTOR_DB_ID"
