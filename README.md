@@ -389,7 +389,10 @@ llama-3.2-1B-Instruct-demo/
 ├── servingruntime-llama32-1b.yaml # Runtime vLLM
 ├── inferenceservice-llama32-1b.yaml # Service d'inférence
 ├── test-llama-model.py            # Tests Python
-└── test-llama-curl.sh             # Tests curl
+├── test-llama-curl.sh             # Tests curl
+└── llamastack/                    # Configuration LlamaStack
+    ├── llama-stack-inference-model-secret.yaml  # Secret pour LlamaStack
+    └── llama-stack-distribution.yaml            # Distribution LlamaStack
 ```
 
 ## 🤝 Contribution

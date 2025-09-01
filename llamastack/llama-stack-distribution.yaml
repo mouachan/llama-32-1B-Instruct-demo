@@ -1,0 +1,47 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: lsd-llama-32-1b-instruct
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    openshift.io/description: "LlamaStack Distribution pour le modèle Llama-3.2-1B-Instruct"
+    openshift.io/display-name: "LlamaStack Distribution - Llama 3.2 1B Instruct"
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      resources:
+        requests:
+          cpu: "2"
+          memory: "6Gi"
+        limits:
+          cpu: "4"
+          memory: "8Gi"
+      env:
+        - name: INFERENCE_MODEL
+          valueFrom:
+            secretKeyRef:
+              key: INFERENCE_MODEL
+              name: llama-stack-inference-model-secret
+        - name: VLLM_URL
+          valueFrom:
+            secretKeyRef:
+              key: VLLM_URL
+              name: llama-stack-inference-model-secret
+        - name: VLLM_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              key: VLLM_TLS_VERIFY
+              name: llama-stack-inference-model-secret
+        - name: MILVUS_DB_PATH
+          value: ~/.llama/milvus.db
+        - name: FMS_ORCHESTRATOR_URL
+          value: "http://localhost"
+      name: llama-stack
+      port: 8321
+    distribution:
+      image: quay.io/opendatahub/llama-stack:odh
+    storage:
+      size: "10Gi"
