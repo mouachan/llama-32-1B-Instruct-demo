@@ -105,7 +105,7 @@ Le use case assurance inclut :
 
 ```bash
 # Configurer les variables d'environnement
-export LLAMA_STACK_URL="http://localhost:8321"
+export LLAMA_STACK_URL="http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321"
 export MODEL_ID="llama-32-1b-instruct"
 export VECTOR_DB_ID="my_milvus_db"
 
@@ -116,7 +116,7 @@ python3 test-rag.py
 
 ```bash
 # Configurer les variables d'environnement
-export LLAMA_STACK_URL="http://localhost:8321"
+export LLAMA_STACK_URL="http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321"
 export MODEL_ID="llama-32-1b-instruct"
 export VECTOR_DB_ID="assurance_milvus_db"
 
@@ -166,7 +166,7 @@ from llama_stack_client import Client, Agent, AgentEventLogger
 import uuid
 
 # Connexion au client
-client = Client(base_url="http://localhost:8321")
+client = Client(base_url="http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321")
 
 # Créer un agent RAG
 rag_agent = Agent(

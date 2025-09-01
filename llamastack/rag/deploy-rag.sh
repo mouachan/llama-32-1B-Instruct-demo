@@ -155,13 +155,14 @@ check_pipelinerun_status() {
 test_rag_functionality() {
     print_status "Test de la fonctionnalité RAG..."
     
-    # Obtenir l'URL de LlamaStack
-    LLAMA_STACK_URL=$(oc get route -n llama-instruct-32-1b-demo -o jsonpath='{.items[?(@.metadata.name=="lsd-llama-32-1b-instruct")].spec.host}' 2>/dev/null || echo "localhost:8321")
+    # Obtenir l'URL de LlamaStack depuis OpenShift
+    LLAMA_STACK_URL=$(oc get route -n llama-instruct-32-1b-demo -o jsonpath='{.items[?(@.metadata.name=="lsd-llama-32-1b-instruct")].spec.host}' 2>/dev/null)
     
-    if [ "$LLAMA_STACK_URL" != "localhost:8321" ]; then
-        LLAMA_STACK_URL="https://$LLAMA_STACK_URL"
+    if [ -z "$LLAMA_STACK_URL" ]; then
+        # Si pas de route, utiliser le service interne
+        LLAMA_STACK_URL="http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321"
     else
-        LLAMA_STACK_URL="http://localhost:8321"
+        LLAMA_STACK_URL="https://$LLAMA_STACK_URL"
     fi
     
     print_status "URL LlamaStack: $LLAMA_STACK_URL"
