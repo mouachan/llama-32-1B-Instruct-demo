@@ -19,7 +19,10 @@ llamastack/rag/
 ├── README.md                    # Cette documentation
 ├── docling-pipeline.yaml        # Pipeline Tekton pour l'ingestion de documents
 ├── deploy-rag.sh               # Script de déploiement automatisé
-└── test-rag.py                 # Script de test de la fonctionnalité RAG
+├── test-rag.py                 # Script de test de la fonctionnalité RAG
+├── assurance-config.yaml        # Configuration pour le use case assurance
+├── deploy-assurance.sh         # Script de déploiement assurance
+└── test-assurance-rag.py       # Script de test assurance RAG
 ```
 
 ## 🚀 Déploiement
@@ -38,6 +41,20 @@ cd llamastack/rag
 chmod +x deploy-rag.sh
 ./deploy-rag.sh
 ```
+
+### Déploiement du use case assurance
+
+```bash
+cd llamastack/rag
+chmod +x deploy-assurance.sh
+./deploy-assurance.sh
+```
+
+Le use case assurance inclut :
+- **Documents d'assurance** : Guides d'assurance auto, habitation, vie
+- **Questions spécialisées** : Garanties, sinistres, exclusions, prix
+- **Scénarios réalistes** : Accident, vol, dégât des eaux, résiliation
+- **Tests automatisés** : Validation de la fonctionnalité RAG assurance
 
 ### Déploiement manuel
 
@@ -94,6 +111,17 @@ export VECTOR_DB_ID="my_milvus_db"
 
 # Exécuter le test
 python3 test-rag.py
+
+### Test du use case assurance
+
+```bash
+# Configurer les variables d'environnement
+export LLAMA_STACK_URL="http://localhost:8321"
+export MODEL_ID="llama-32-1b-instruct"
+export VECTOR_DB_ID="assurance_milvus_db"
+
+# Exécuter le test assurance
+python3 test-assurance-rag.py
 ```
 
 ### Vérification du statut

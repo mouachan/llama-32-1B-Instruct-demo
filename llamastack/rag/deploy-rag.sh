@@ -104,9 +104,9 @@ spec:
     name: docling-pipeline
   params:
     - name: base_url
-      value: "https://raw.githubusercontent.com/opendatahub-io/odh-demos/main/rag-demo/sample-docs"
+      value: "https://www.iii.org/sites/default/files/docs/pdf/auto_insurance_basics.pdf"
     - name: pdf_filenames
-      value: "sample-document.pdf"
+      value: "auto_insurance_basics.pdf"
     - name: vector_db_id
       value: "test_milvus_db"
     - name: embed_model_id

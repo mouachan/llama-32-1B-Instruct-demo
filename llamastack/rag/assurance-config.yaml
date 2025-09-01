@@ -1,0 +1,75 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: docling-assurance-run
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    openshift.io/description: "PipelineRun pour l'ingestion de documents d'assurance"
+    openshift.io/display-name: "Docling Pipeline - Assurance"
+  labels:
+    opendatahub.io/dashboard: "true"
+    usecase: "assurance"
+spec:
+  pipelineRef:
+    name: docling-pipeline
+  params:
+    - name: base_url
+      value: "https://www.iii.org/sites/default/files/docs/pdf"
+    - name: pdf_filenames
+      value: "auto_insurance_basics.pdf,homeowners_insurance_basics.pdf,life_insurance_basics.pdf"
+    - name: vector_db_id
+      value: "assurance_milvus_db"
+    - name: embed_model_id
+      value: "granite-embedding-125m"
+    - name: max_tokens
+      value: "512"
+    - name: use_gpu
+      value: "false"
+    - name: num_workers
+      value: "3"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: docling-assurance-fr-run
+  namespace: llama-instruct-32-1b-demo
+  annotations:
+    openshift.io/description: "PipelineRun pour l'ingestion de documents d'assurance français"
+    openshift.io/display-name: "Docling Pipeline - Assurance FR"
+  labels:
+    opendatahub.io/dashboard: "true"
+    usecase: "assurance-fr"
+spec:
+  pipelineRef:
+    name: docling-pipeline
+  params:
+    - name: base_url
+      value: "https://www.ffsa.fr/sites/default/files/2021-01"
+    - name: pdf_filenames
+      value: "guide_assurance_auto.pdf,guide_assurance_habitation.pdf"
+    - name: vector_db_id
+      value: "assurance_fr_milvus_db"
+    - name: embed_model_id
+      value: "granite-embedding-125m"
+    - name: max_tokens
+      value: "512"
+    - name: use_gpu
+      value: "false"
+    - name: num_workers
+      value: "2"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
