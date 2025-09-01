@@ -168,10 +168,12 @@ chmod +x deploy.sh
 2. ✅ Création du secret avec le token Hugging Face
 3. ✅ Création du PVC pour stocker le modèle
 4. ✅ Création du secret de connexion PVC
-5. ✅ Téléchargement du modèle depuis Hugging Face
-6. ✅ Vérification du contenu du PVC
-7. ✅ Création du ServingRuntime (Serving Model)
-8. ✅ Création de l'InferenceService
+5. ✅ Création du secret LlamaStack
+6. ✅ Téléchargement du modèle depuis Hugging Face
+7. ✅ Vérification du contenu du PVC
+8. ✅ Création du ServingRuntime (Serving Model)
+9. ✅ Création de l'InferenceService
+10. ✅ Création de la LlamaStackDistribution
 
 ### 5. Vérification du déploiement
 
@@ -187,6 +189,9 @@ oc get pvc -n llama-instruct-32-1b-demo
 
 # Vérifier les secrets
 oc get secrets -n llama-instruct-32-1b-demo
+
+# Vérifier LlamaStack
+oc get llamastackdistribution -n llama-instruct-32-1b-demo
 
 # Vérifier les événements
 oc get events -n llama-instruct-32-1b-demo --sort-by='.lastTimestamp'
@@ -223,13 +228,14 @@ chmod +x cleanup.sh
 **Ce que fait le script :**
 1. 🔍 Vérification de la connexion OpenShift
 2. ⚠️ Demande de confirmation avant suppression
-3. 🚫 Suppression de l'InferenceService
-4. ⚙️ Suppression du ServingRuntime
-5. 📥 Suppression des jobs de téléchargement
-6. 🔄 Suppression des pods restants
-7. 🔐 Suppression des secrets
-8. 💾 Suppression du PVC
-9. 📁 Suppression du namespace complet
+3. 🤖 Suppression de la LlamaStackDistribution
+4. 🚫 Suppression de l'InferenceService
+5. ⚙️ Suppression du ServingRuntime
+6. 📥 Suppression des jobs de téléchargement
+7. 🔄 Suppression des pods restants
+8. 🔐 Suppression des secrets
+9. 💾 Suppression du PVC
+10. 📁 Suppression du namespace complet
 
 **⚠️ Attention :** Ce script supprime TOUTES les ressources du projet !
 
@@ -238,6 +244,9 @@ chmod +x cleanup.sh
 Si vous préférez nettoyer manuellement :
 
 ```bash
+# Supprimer la LlamaStackDistribution
+oc delete llamastackdistribution lsd-llama-32-1b-instruct -n llama-instruct-32-1b-demo
+
 # Supprimer l'InferenceService
 oc delete inferenceservice llama-32-1b-instruct -n llama-instruct-32-1b-demo
 
@@ -253,6 +262,7 @@ oc delete pods --all -n llama-instruct-32-1b-demo
 # Supprimer les secrets
 oc delete secret huggingface-token -n llama-instruct-32-1b-demo
 oc delete secret llama-model-pvc-connection -n llama-instruct-32-1b-demo
+oc delete secret llama-stack-inference-model-secret -n llama-instruct-32-1b-demo
 
 # Supprimer le PVC
 oc delete pvc pvc-llama32-1b-instruct -n llama-instruct-32-1b-demo
@@ -295,6 +305,9 @@ Pour redéployer après un nettoyage :
 | `PVC_SIZE` | Taille du PVC | `10Gi` |
 | `STORAGE_CLASS` | Classe de stockage | `gp3-csi` |
 | `API_PORT` | Port de l'API | `8080` |
+| `LLAMASTACK_INFERENCE_MODEL` | Nom du modèle pour LlamaStack | `llama-32-1b-instruct` |
+| `LLAMASTACK_VLLM_URL` | URL vLLM pour LlamaStack | `http://llama-32-1b-instruct-predictor:8080/v1` |
+| `LLAMASTACK_VLLM_TLS_VERIFY` | Vérification TLS pour LlamaStack | `false` |
 
 ### Ressources créées
 
@@ -305,6 +318,8 @@ Pour redéployer après un nettoyage :
 - **ServingRuntime** : `llama-32-1b-instruct` (vLLM)
 - **InferenceService** : `llama-32-1b-instruct`
 - **Job** : `download-llama32-1b-instruct-hf-cli`
+- **LlamaStackDistribution** : `lsd-llama-32-1b-instruct`
+- **Secret** : `llama-stack-inference-model-secret` (configuration LlamaStack)
 
 ## 🧪 Tests
 
@@ -312,9 +327,31 @@ Pour redéployer après un nettoyage :
 
 Le modèle expose les endpoints suivants :
 
+## 🤖 LlamaStack
+
+### Déploiement de LlamaStack
+
+LlamaStack est automatiquement déployé avec le modèle principal et fournit une interface unifiée pour l'inférence et les fonctionnalités RAG.
+
+**Ressources LlamaStack créées :**
+- **LlamaStackDistribution** : `lsd-llama-32-1b-instruct`
+- **Secret** : `llama-stack-inference-model-secret` (configuration du modèle)
+
+**Test de LlamaStack :**
+```bash
+# Vérifier le statut de LlamaStack
+oc get llamastackdistribution -n llama-instruct-32-1b-demo
+
+# Consulter les logs
+oc logs -f deployment/lsd-llama-32-1b-instruct -n llama-instruct-32-1b-demo
+
+# Test avec le notebook Jupyter
+# Ouvrir llamastack/rag/test-llamastack-notebook.ipynb dans OpenShift AI Workbench
+```
+
 ### Test de la fonctionnalité RAG (optionnel)
 
-Si vous souhaitez utiliser la fonctionnalité RAG avec Docling :
+Si vous souhaitez utiliser la fonctionnalité RAG avec Docling et LlamaStack :
 
 ```bash
 # Aller dans le répertoire RAG
@@ -328,9 +365,15 @@ oc apply -f docling-pipeline.yaml
 
 # Tester la fonctionnalité RAG
 python3 test-rag.py
+
+# Tester le use case assurance
+./deploy-assurance.sh
+python3 test-assurance-rag.py
 ```
 
-Pour plus de détails, consultez le [README RAG](llamastack/rag/README.md).
+**📚 Documentation RAG complète :** Consultez le [README RAG détaillé](llamastack/rag/README.md) pour plus d'informations sur l'architecture, la configuration et l'utilisation de la fonctionnalité RAG.
+
+**🧪 Test avec Jupyter :** Utilisez le [notebook de test](llamastack/rag/test-llamastack-notebook.ipynb) dans OpenShift AI Workbench pour tester LlamaStack et les fonctionnalités RAG.
 
 - **`/v1/models`** : Liste des modèles disponibles
 - **`/v1/chat/completions`** : Chat conversationnel
@@ -414,10 +457,15 @@ llama-3.2-1B-Instruct-demo/
     ├── llama-stack-inference-model-secret.yaml  # Secret pour LlamaStack
     ├── llama-stack-distribution.yaml            # Distribution LlamaStack
     └── rag/                       # Configuration RAG avec Docling
-        ├── README.md              # Documentation RAG
+        ├── README.md              # Documentation RAG complète
+        ├── README-NOTEBOOK.md     # Documentation du notebook de test
+        ├── test-llamastack-notebook.ipynb  # Notebook Jupyter pour tests
         ├── docling-pipeline.yaml  # Pipeline Tekton pour l'ingestion
+        ├── assurance-config.yaml  # Configuration pour le use case assurance
         ├── deploy-rag.sh         # Script de déploiement RAG
-        └── test-rag.py           # Script de test RAG
+        ├── deploy-assurance.sh   # Script de déploiement assurance
+        ├── test-rag.py           # Script de test RAG général
+        └── test-assurance-rag.py # Script de test RAG assurance
 ```
 
 ## 🤝 Contribution
