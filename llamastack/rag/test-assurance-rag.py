@@ -12,7 +12,7 @@ def test_assurance_rag():
     """Test de la fonctionnalité RAG pour l'assurance"""
     
     # Configuration
-    LLAMA_STACK_URL = os.getenv('LLAMA_STACK_URL', 'http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321')
+    LLAMA_STACK_URL = os.getenv('LLAMA_STACK_URL', 'http://lsd-llama-32-1b-instruct-service:8321')
     MODEL_ID = os.getenv('MODEL_ID', 'llama-32-1b-instruct')
     VECTOR_DB_ID = os.getenv('VECTOR_DB_ID', 'assurance_milvus_db')
     
@@ -139,7 +139,7 @@ def test_assurance_rag():
 def test_assurance_scenarios():
     """Test de scénarios d'assurance spécifiques"""
     
-    LLAMA_STACK_URL = os.getenv('LLAMA_STACK_URL', 'http://lsd-llama-32-1b-instruct.llama-instruct-32-1b-demo.svc.cluster.local:8321')
+    LLAMA_STACK_URL = os.getenv('LLAMA_STACK_URL', 'http://lsd-llama-32-1b-instruct-service:8321')
     MODEL_ID = os.getenv('MODEL_ID', 'llama-32-1b-instruct')
     VECTOR_DB_ID = os.getenv('VECTOR_DB_ID', 'assurance_milvus_db')
     

@@ -32,3 +32,8 @@ STORAGE_CLASS="gp3-csi"
 # Configuration de l'API
 API_PORT="8080"
 API_TIMEOUT="60"
+
+# Configuration LlamaStack
+LLAMASTACK_INFERENCE_MODEL="llama-32-1b-instruct"
+LLAMASTACK_VLLM_URL="http://llama-32-1b-instruct-predictor:8080/v1"
+LLAMASTACK_VLLM_TLS_VERIFY="false"

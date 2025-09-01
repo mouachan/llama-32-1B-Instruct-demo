@@ -150,7 +150,7 @@ spec:
       description: "Répertoire d'entrée avec les PDFs"
   steps:
     - name: process
-      image: quay.io/opendatahub/docling:latest
+      image: quay.io/docling-project/docling-serve-cpu:latest
       script: |
         #!/bin/bash
         set -e
@@ -165,15 +165,20 @@ spec:
         export USE_GPU="$(params.use_gpu)"
         export NUM_WORKERS="$(params.num_workers)"
         
-        # Traiter les documents PDF
-        docling process \
-          --input-dir $(workspaces.input.path)/pdfs \
-          --output-dir $(workspaces.input.path)/processed \
-          --vector-db-id $VECTOR_DB_ID \
-          --embed-model-id $EMBED_MODEL_ID \
-          --max-tokens $MAX_TOKENS \
-          --use-gpu $USE_GPU \
-          --num-workers $NUM_WORKERS
+        # Démarrer Docling Serve
+        docling-serve run --host 0.0.0.0 --port 5001 &
+        sleep 10
+        
+        # Traiter les documents PDF via l'API
+        for pdf_file in $(workspaces.input.path)/pdfs/*.pdf; do
+          echo "Traitement de $pdf_file..."
+          curl -X POST "http://localhost:5001/v1/convert/source" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"sources\": [{\"kind\": \"file\", \"path\": \"$pdf_file\"}],
+              \"output\": {\"kind\": \"text\", \"path\": \"$(workspaces.input.path)/processed/$(basename $pdf_file .pdf).txt\"}
+            }"
+        done
         
         echo "Traitement Docling terminé"
         echo "Documents ingérés dans la base vectorielle: $VECTOR_DB_ID"

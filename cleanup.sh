@@ -42,9 +42,10 @@ echo -e "${GREEN}✅ Connecté à OpenShift en tant que : $(oc whoami)${NC}"
 echo -e "${RED}⚠️  ATTENTION : Ce script va supprimer TOUTES les ressources suivantes :${NC}"
 echo "   - Namespace : $PROJECT_NAME"
 echo "   - PVC : pvc-llama32-1b-instruct"
-echo "   - Secrets : huggingface-token, llama-model-pvc-connection"
+echo "   - Secrets : huggingface-token, llama-model-pvc-connection, llama-stack-inference-model-secret"
 echo "   - ServingRuntime : llama-32-1b-instruct"
 echo "   - InferenceService : llama-32-1b-instruct"
+echo "   - LlamaStackDistribution : lsd-llama-32-1b-instruct"
 echo "   - Jobs de téléchargement"
 echo "   - Tous les pods associés"
 echo ""
@@ -56,6 +57,10 @@ if [ "$confirm" != "oui" ]; then
 fi
 
 echo -e "${YELLOW}🗑️  Début du nettoyage...${NC}"
+
+# Suppression de la LlamaStackDistribution
+echo -e "${YELLOW}🤖 Suppression de la LlamaStackDistribution...${NC}"
+oc delete llamastackdistribution lsd-llama-32-1b-instruct -n "$PROJECT_NAME" --ignore-not-found=true
 
 # Suppression de l'InferenceService
 echo -e "${YELLOW}🚫 Suppression de l'InferenceService...${NC}"
@@ -77,6 +82,7 @@ oc delete pods --all -n "$PROJECT_NAME" --ignore-not-found=true
 echo -e "${YELLOW}🔐 Suppression des secrets...${NC}"
 oc delete secret huggingface-token -n "$PROJECT_NAME" --ignore-not-found=true
 oc delete secret llama-model-pvc-connection -n "$PROJECT_NAME" --ignore-not-found=true
+oc delete secret llama-stack-inference-model-secret -n "$PROJECT_NAME" --ignore-not-found=true
 
 # Suppression du PVC
 echo -e "${YELLOW}💾 Suppression du PVC...${NC}"
@@ -89,6 +95,7 @@ oc delete namespace "$PROJECT_NAME" --ignore-not-found=true
 echo -e "${GREEN}✅ Nettoyage terminé !${NC}"
 echo ""
 echo -e "${BLUE}📋 Ressources supprimées :${NC}"
+echo "   ✅ LlamaStackDistribution"
 echo "   ✅ InferenceService"
 echo "   ✅ ServingRuntime"
 echo "   ✅ Jobs de téléchargement"

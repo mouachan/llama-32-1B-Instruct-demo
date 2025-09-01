@@ -78,6 +78,15 @@ PVC_URI="pvc://pvc-llama32-1b-instruct"
 PVC_URI_B64=$(echo -n "$PVC_URI" | base64)
 export PVC_URI_B64
 
+# Encodage des variables LlamaStack en base64
+echo -e "${YELLOW}🔐 Encodage des variables LlamaStack...${NC}"
+LLAMASTACK_INFERENCE_MODEL_B64=$(echo -n "${LLAMASTACK_INFERENCE_MODEL:-llama-32-1b-instruct}" | base64)
+LLAMASTACK_VLLM_URL_B64=$(echo -n "${LLAMASTACK_VLLM_URL:-http://llama-32-1b-instruct-predictor:8080/v1}" | base64)
+LLAMASTACK_VLLM_TLS_VERIFY_B64=$(echo -n "${LLAMASTACK_VLLM_TLS_VERIFY:-false}" | base64)
+export LLAMASTACK_INFERENCE_MODEL_B64
+export LLAMASTACK_VLLM_URL_B64
+export LLAMASTACK_VLLM_TLS_VERIFY_B64
+
 # Vérification de la connexion OpenShift
 echo -e "${YELLOW}🔍 Vérification de la connexion OpenShift...${NC}"
 if ! oc whoami >/dev/null 2>&1; then
@@ -111,6 +120,10 @@ echo -e "${YELLOW}💾 PVC créé (sera bound lors de l'utilisation)...${NC}"
 echo -e "${YELLOW}🔗 Création du secret de connexion PVC...${NC}"
 HUGGINGFACE_MODEL_ESCAPED=$(echo "$HUGGINGFACE_MODEL" | sed 's/[\/&]/\\&/g')
 sed "s/\${OPENSHIFT_PROJECT}/$OPENSHIFT_PROJECT/g; s/\${HUGGINGFACE_MODEL}/$HUGGINGFACE_MODEL_ESCAPED/g; s/\${PVC_URI_B64}/$PVC_URI_B64/g" secret-llama-model-pvc-connection.yaml | oc apply -f -
+
+# Création du secret LlamaStack
+echo -e "${YELLOW}🔐 Création du secret LlamaStack...${NC}"
+sed "s/\${LLAMASTACK_INFERENCE_MODEL_B64}/$LLAMASTACK_INFERENCE_MODEL_B64/g; s/\${LLAMASTACK_VLLM_URL_B64}/$LLAMASTACK_VLLM_URL_B64/g; s/\${LLAMASTACK_VLLM_TLS_VERIFY_B64}/$LLAMASTACK_VLLM_TLS_VERIFY_B64/g" llamastack/llama-stack-inference-model-secret.yaml | oc apply -f -
 
 # Téléchargement du modèle
 echo -e "${YELLOW}📥 Téléchargement du modèle depuis Hugging Face...${NC}"
@@ -176,6 +189,10 @@ oc apply -f /tmp/inferenceservice-temp.yaml
 
 # Nettoyer
 rm -f /tmp/inferenceservice-temp.yaml
+
+# Création de la LlamaStackDistribution
+echo -e "${YELLOW}🤖 Création de la LlamaStackDistribution...${NC}"
+oc apply -f llamastack/llama-stack-distribution.yaml
 
 echo -e "${GREEN}✅ Déploiement terminé !${NC}"
 echo ""
