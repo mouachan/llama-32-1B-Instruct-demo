@@ -73,10 +73,27 @@ oc apply -f namespace.yaml
 
 #### 3.2 Création du secret Hugging Face
 
+**⚠️ Important :** Le secret Kubernetes nécessite que le token soit encodé en base64.
+
+**Avec le script automatique :**
 ```bash
-# Créer le secret avec votre token HF
-oc apply -f secret-huggingface.yaml
+# Le script encode automatiquement le token depuis .env
+./deploy.sh
 ```
+
+**Manuellement :**
+```bash
+# Encoder le token en base64
+HUGGINGFACE_TOKEN_B64=$(echo -n "votre_token_ici" | base64)
+
+# Appliquer le secret avec le token encodé
+sed "s/\${HUGGINGFACE_TOKEN_B64}/$HUGGINGFACE_TOKEN_B64/g" secret-huggingface.yaml | oc apply -f -
+```
+
+**Explication :**
+- `HUGGINGFACE_TOKEN` dans `.env` : token brut (lisible)
+- `HUGGINGFACE_TOKEN_B64` dans `secret-huggingface.yaml` : token encodé en base64 (requis par Kubernetes)
+- Le script `deploy.sh` fait automatiquement cette conversion
 
 #### 3.3 Création du PVC
 
