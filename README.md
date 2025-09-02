@@ -84,7 +84,7 @@ oc apply -f namespace.yaml
 **Manuellement :**
 ```bash
 # Encoder le token en base64
-HUGGINGFACE_TOKEN_B64=$(echo -n "votre_token_ici" | base64)
+HUGGINGFACE_TOKEN_B64=$(echo -n "$HUGGINGFACE_TOKEN" | base64)
 
 # Appliquer le secret avec le token encodé
 sed "s/\${HUGGINGFACE_TOKEN_B64}/$HUGGINGFACE_TOKEN_B64/g" secret-huggingface.yaml | oc apply -f -
