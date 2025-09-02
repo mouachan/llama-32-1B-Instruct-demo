@@ -92,7 +92,7 @@ sed "s/\${HUGGINGFACE_TOKEN_B64}/$HUGGINGFACE_TOKEN_B64/g" secret-huggingface.ya
 
 **Explication :**
 - `HUGGINGFACE_TOKEN` dans `.env` : token brut (lisible)
-- `HUGGINGFACE_TOKEN_B64` dans `secret-huggingface.yaml` : token encodé en base64 (requis par Kubernetes)
+- `token: ${HUGGINGFACE_TOKEN_B64}` dans `secret-huggingface.yaml` : token encodé en base64 (requis par Kubernetes)
 - Le script `deploy.sh` fait automatiquement cette conversion
 
 #### 3.3 Création du PVC
