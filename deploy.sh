@@ -23,7 +23,7 @@ if [ ! -f .env ]; then
     export HUGGINGFACE_TOKEN="VOTRE_TOKEN_HF_ICI"
     export GPU_TYPE="NVIDIA-A10G-PRIVATE"
     export GPU_COUNT="1"
-    export GPU_MEMORY_UTILIZATION="0.85"
+    export GPU_MEMORY_UTILIZATION="0.95"
     export MODEL_MAX_LENGTH="4096"
     export MODEL_TENSOR_PARALLEL_SIZE="1"
     export CPU_REQUEST="2"
